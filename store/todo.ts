@@ -3,38 +3,41 @@ import {v4 as uuid} from 'uuid'
 
 export interface Todo {
     id: string;
-    title: string;
+    label: string;
     done: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
 
+export type Todos = Todo[] | undefined[];
+
 export interface TodoAdd {
-    title: string;
+    label: string;
 }
 
 export interface TodoUpdate {
-    title?: string;
+    label?: string;
     done?: boolean;
 }
 
-
-export interface TodoState {
-    items: Todo[] | undefined[];
+interface TodoState {
+    items: Todos;
 }
 
 const state = (): TodoState => ({
-    items: []
-})
+    items: [],
+});
 
 const getters = {
-    getById: (state: TodoState) => (id: string) => {
-        return state.items.find((item: Todo) => item.id === id);
+    getTodoById: (state: TodoState) => {
+        return (id: string) => state.items.find((item) => !!item && (item as Todo).id === id);
     },
-    getOrderedTodos: (state: TodoState) => [...state.items].sort(
-        (a: Todo, b: Todo) => a.createdAt.getTime() - b.createdAt.getTime()
-    ),
-}
+    getSortedTodos: (state: TodoState) => {
+        return [...state.items].sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+    },
+};
 
 const actions = {
     add(partialTodo: TodoAdd) {
